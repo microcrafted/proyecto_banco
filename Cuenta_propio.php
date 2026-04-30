@@ -1,22 +1,35 @@
 <?php
+
 class Cuenta {
     private $conexion;
 
+    /**
+     * Constructor que recibe la instancia de conexión PDO.
+     */
     public function __construct($db) {
         $this->conexion = $db;
     }
 
-    //HU6 
+    /**
+     * HU6: Crear cuenta bancaria.
+     * Genera un número de cuenta único y lo persiste en la base de datos.
+     * * @param int $idUsuario Identificador del cliente dueño de la cuenta.
+     * @param string $tipoDeCuenta Tipo de cuenta (ahorro o corriente).
+     * @return array Respuesta con el estado de la operación.
+     */
     public function crearNuevaCuenta($idUsuario, $tipoDeCuenta) {
-        //CTA + Año + 6 dígitos
+        // Generación de número de cuenta único (Requerimiento técnico HU6)
+        // Formato: CTA + Año + 6 dígitos aleatorios
         $numeroDeCuentaUnico = "CTA-" . date("Y") . "-" . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
 
         try {
+            // Preparación de la consulta (Cumple DoD 1.3 - No concatenación)
             $query = "INSERT INTO CUENTAS_BANCARIAS (id_usuario, num_cuenta, tipo, saldo, estado) 
-                VALUES (:id_usuario, :num_cuenta, :tipo, 0.00, 'activa')";
+                      VALUES (:id_usuario, :num_cuenta, :tipo, 0.00, 'activa')";
             
             $sentencia = $this->conexion->prepare($query);
             
+            // Vinculación de parámetros segura
             $sentencia->bindParam(':id_usuario', $idUsuario, PDO::PARAM_INT);
             $sentencia->bindParam(':num_cuenta', $numeroDeCuentaUnico, PDO::PARAM_STR);
             $sentencia->bindParam(':tipo', $tipoDeCuenta, PDO::PARAM_STR);
@@ -35,18 +48,11 @@ class Cuenta {
             }
 
         } catch (PDOException $excepcion) {
-            return ["status" => "error", "mensaje" => "Error de BD: " . $excepcion->getMessage()];
+            // Manejo de errores
+            return [
+                "status" => "error", 
+                "mensaje" => "Error de base de datos: " . $excepcion->getMessage()
+            ];
         }
     }
-
-    //HU7 - Dashboard
-    public function obtenerCuentas($id_usuario) {
-        $query = "SELECT num_cuenta, tipo, saldo FROM CUENTAS_BANCARIAS WHERE id_usuario = :id_usuario AND estado = 'activa'";
-        $stmt = $this->conexion->prepare($query); // Usamos $conexion para respetar el código de Mich
-        $stmt->bindParam(":id_usuario", $id_usuario);
-        $stmt->execute();
-        
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
 }
-?>

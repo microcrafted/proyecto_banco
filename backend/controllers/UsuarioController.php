@@ -11,7 +11,7 @@ $cuenta = new Cuenta($db);
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
-//REGISTRO
+// REGISTRO
 if ($action == 'registrar' && $_POST) {
     $nombre = htmlspecialchars(trim($_POST['nombre']));
     $apellido = htmlspecialchars(trim($_POST['apellido']));
@@ -19,10 +19,16 @@ if ($action == 'registrar' && $_POST) {
     $password = $_POST['password'];
 
     $nuevo_id = $usuario->registrar($nombre, $apellido, $email, $password);
-
+    
     if ($nuevo_id) {
-        $cuenta->crearCuenta($nuevo_id); 
-        header("Location: ../views/login.php?msg=Registro exitoso. Ya puedes iniciar sesion.");
+        $respuesta_cuenta = $cuenta->crearNuevaCuenta($nuevo_id, 'ahorro'); 
+        
+        if ($respuesta_cuenta['status'] === 'success') {
+            $num_cta = $respuesta_cuenta['data']['numero_cuenta'];
+            header("Location: ../views/login.php?msg=Registro exitoso. Se genero tu cuenta: " . $num_cta);
+        } else {
+            header("Location: ../views/login.php?error=Registro exitoso, pero hubo un error al generar la cuenta bancaria.");
+        }
     } else {
         header("Location: ../views/registro.php?error=El correo ya esta registrado.");
     }
@@ -35,7 +41,7 @@ if ($action == 'login' && $_POST) {
     $password = $_POST['password'];
 
     $datos = $usuario->login($email, $password);
-
+    
     if ($datos) {
         $_SESSION['id_usuario'] = $datos['id_usuario'];
         $_SESSION['nombre_completo'] = $datos['nombre'] . ' ' . $datos['apellido'];
