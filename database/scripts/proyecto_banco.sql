@@ -1,4 +1,4 @@
-create DATABASE proyecto_victor;
+-- create DATABASE proyecto_victor;
 use proyecto_victor;
 
 -- ============================================

@@ -19,7 +19,6 @@ class Usuario {
                 return $this->conn->lastInsertId();
             }
         } catch(PDOException $e) {
-            // El código de error 1062 en MySQL significa "Entrada duplicada"
             if($e->errorInfo[1] == 1062) {
                 return false; 
             }
