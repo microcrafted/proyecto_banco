@@ -11,30 +11,26 @@ $cuenta = new Cuenta($db);
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
-//REGISTRO (Frontend con Fetch API)
-//leemos datos JSON que envía el javascript
-$data = json_decode(file_get_contents("php://input"), true);
-
-if ($action == 'registrar' && $data) {
-    $nombre = htmlspecialchars(trim($data['nombre']));
-    $apellido = htmlspecialchars(trim($data['apellido']));
-    $email = htmlspecialchars(trim($data['email']));
-    $password = $data['password'];
+// REGISTRO
+if ($action == 'registrar' && $_POST) {
+    $nombre = htmlspecialchars(trim($_POST['nombre']));
+    $apellido = htmlspecialchars(trim($_POST['apellido']));
+    $email = htmlspecialchars(trim($_POST['email']));
+    $password = $_POST['password'];
 
     $nuevo_id = $usuario->registrar($nombre, $apellido, $email, $password);
     
     if ($nuevo_id) {
-        $respuesta_cuenta = $cuenta->crearNuevaCuenta($nuevo_id, 'ahorro');
+        $respuesta_cuenta = $cuenta->crearNuevaCuenta($nuevo_id, 'ahorro'); 
         
         if ($respuesta_cuenta['status'] === 'success') {
             $num_cta = $respuesta_cuenta['data']['numero_cuenta'];
-            //en lugar de redireccionar, respondemos con JSON
-            echo json_encode(["ok" => true, "mensaje" => "Registro exitoso. Se generó tu cuenta: " . $num_cta]);
+            header("Location: ../views/login.php?msg=Registro exitoso. Se genero tu cuenta: " . $num_cta);
         } else {
-            echo json_encode(["ok" => false, "mensaje" => "Registro exitoso, pero hubo un error al generar la cuenta bancaria."]);
+            header("Location: ../views/login.php?error=Registro exitoso, pero hubo un error al generar la cuenta bancaria.");
         }
     } else {
-        echo json_encode(["ok" => false, "mensaje" => "El correo ya está registrado."]);
+        header("Location: ../views/registro.php?error=El correo ya esta registrado.");
     }
     exit;
 }
@@ -62,4 +58,35 @@ if ($action == 'logout') {
     header("Location: ../views/login.php");
     exit;
 }
+
+if ($action == 'crearCuenta' && $_POST) {
+
+    $tipo = $_POST['tipo']; // ahorro o corriente
+    $id_usuario = $_SESSION['id_usuario'];
+
+    $respuesta = $cuenta->crearNuevaCuenta($id_usuario, $tipo);
+
+    if ($respuesta['status'] === 'success') {
+        header("Location: ../views/dashboard.php?msg=Cuenta creada correctamente");
+    } else {
+        header("Location: ../views/dashboard.php?error=" . $respuesta['mensaje']);
+    }
+    exit;
+}
+
+if ($action == 'cerrarCuenta' && $_POST) {
+
+    $id_cuenta = $_POST['id_cuenta'];
+    $id_usuario = $_SESSION['id_usuario'];
+
+    $respuesta = $cuenta->cerrarCuenta($id_cuenta, $id_usuario);
+
+    if ($respuesta['status'] === 'success') {
+        header("Location: ../views/dashboard.php?msg=Cuenta cerrada");
+    } else {
+        header("Location: ../views/dashboard.php?error=" . $respuesta['mensaje']);
+    }
+    exit;
+}
+
 ?>
