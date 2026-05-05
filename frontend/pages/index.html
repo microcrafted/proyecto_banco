@@ -4,25 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="./../components/estilos.css">
+    <link rel="stylesheet" href="./../css/estilos.css">
 </head>
 <body>
-
+    <h2>Abrir Cuenta Bancaria</h2>
     <form id="formRegistro">
-    <input type="text" id="nombre" placeholder="Nombre" required>
-    <input type="text" id="apellido" placeholder="Apellido" required>
-    <input type="email" id="email" placeholder="Correo" required>
-    <input type="password" id="password" placeholder="Contraseña" required>
+        <label>Nombre:</label><br>
+        <input type="text" id="nombre" name="nombre" required><br><br>
 
-    <button type="submit">Registrarse</button>
-</form>
+        <label>Apellido:</label><br>
+        <input type="text" id="apellido" name="apellido" required><br><br>
 
-<p id="mensaje"></p>
+        <label>Correo Electrónico:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
 
-<script src="../components/app.js"></script>
+        <label>Contraseña:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit">Registrarme</button>
+    </form>
+    <br><a href="../../backend/views/login.php">Ya tengo cuenta (Iniciar sesión)</a>
     
+    <p id="mensaje"></p>
+<script src="../js/app.js"></script>
 </body>
-<script src="app.js"></script>
-
-
 </html>

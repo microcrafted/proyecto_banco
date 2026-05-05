@@ -1,39 +1,45 @@
 <?php
 class Usuario {
-
     private $conn;
+    public function __construct($db) { $this->conn = $db; }
 
-    public function __construct($conexion) {
-        $this->conn = $conexion;
+    // HU1: Registro (Incluye el campo apellido de tu BD)
+    public function registrar($nombre, $apellido, $email, $password) {
+        $query = "INSERT INTO USUARIOS (nombre, apellido, email, password_hash) VALUES (:nombre, :apellido, :email, :password_hash)";
+        $stmt = $this->conn->prepare($query);
+        $password_hash = password_hash($password, PASSWORD_BCRYPT);
+        
+        $stmt->bindParam(":nombre", $nombre);
+        $stmt->bindParam(":apellido", $apellido);
+        $stmt->bindParam(":email", $email);
+        $stmt->bindParam(":password_hash", $password_hash);
+        
+        try {
+            if($stmt->execute()) {
+                return $this->conn->lastInsertId();
+            }
+        } catch(PDOException $e) {
+            if($e->errorInfo[1] == 1062) {
+                return false; 
+            }
+        }
+        return false;
     }
 
-    public function registrar($nombre, $apellido, $email, $password) {
-
-        // Verificar si existe el correo 
-        $sql = "SELECT id_usuario FROM USUARIOS WHERE email = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("s", $email);
+    // HU2 y HU21: Login y validación 
+    public function login($email, $password) {
+        $query = "SELECT id_usuario, nombre, apellido, password_hash FROM USUARIOS WHERE email = :email AND activo = 1 AND bloqueado = 0";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $email);
         $stmt->execute();
-        $stmt->store_result();
-
-        if ($stmt->num_rows > 0) {
-            return ["ok" => false, "mensaje" => "El correo ya está registrado"];
+        
+        if($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if(password_verify($password, $row['password_hash'])) {
+                return $row;
+            }
         }
-
-        // Encriptar contraseña por seguridad
-        $password_hash = password_hash($password, PASSWORD_DEFAULT);
-
-        // Insertar usuario
-        $sql = "INSERT INTO USUARIOS (nombre, apellido, email, password_hash)
-                VALUES (?, ?, ?, ?)";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ssss", $nombre, $apellido, $email, $password_hash);
-
-        if ($stmt->execute()) {
-            return ["ok" => true, "mensaje" => "Usuario registrado correctamente"];
-        }
-
-        return ["ok" => false, "mensaje" => "Error al registrar"];
+        return false;
     }
 }
 ?>
