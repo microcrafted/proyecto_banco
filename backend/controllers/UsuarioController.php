@@ -11,29 +11,31 @@ $cuenta = new Cuenta($db);
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
-// REGISTRO
-if ($action == 'registrar' && $_POST) {
-    $nombre = htmlspecialchars(trim($_POST['nombre']));
-    $apellido = htmlspecialchars(trim($_POST['apellido']));
-    $email = htmlspecialchars(trim($_POST['email']));
-    $password = $_POST['password'];
+//REGISTRO Fetch API
+    $data = json_decode(file_get_contents("php://input"), true);
 
-    $nuevo_id = $usuario->registrar($nombre, $apellido, $email, $password);
-    
-    if ($nuevo_id) {
-        $respuesta_cuenta = $cuenta->crearNuevaCuenta($nuevo_id, 'ahorro'); 
+    if ($action == 'registrar' && $data) {
+        $nombre = htmlspecialchars(trim($data['nombre']));
+        $apellido = htmlspecialchars(trim($data['apellido']));
+        $email = htmlspecialchars(trim($data['email']));
+        $password = $data['password'];
+
+        $nuevo_id = $usuario->registrar($nombre, $apellido, $email, $password);
         
-        if ($respuesta_cuenta['status'] === 'success') {
-            $num_cta = $respuesta_cuenta['data']['numero_cuenta'];
-            header("Location: ../views/login.php?msg=Registro exitoso. Se genero tu cuenta: " . $num_cta);
+        if ($nuevo_id) {
+            $respuesta_cuenta = $cuenta->crearNuevaCuenta($nuevo_id, 'ahorro');
+            
+            if ($respuesta_cuenta['status'] === 'success') {
+                $num_cta = $respuesta_cuenta['data']['numero_cuenta'];
+                echo json_encode(["ok" => true, "mensaje" => "Registro exitoso. Se generó tu cuenta: " . $num_cta]);
+            } else {
+                echo json_encode(["ok" => false, "mensaje" => "Registro exitoso, pero hubo un error al generar la cuenta bancaria."]);
+            }
         } else {
-            header("Location: ../views/login.php?error=Registro exitoso, pero hubo un error al generar la cuenta bancaria.");
+            echo json_encode(["ok" => false, "mensaje" => "El correo ya está registrado."]);
         }
-    } else {
-        header("Location: ../views/registro.php?error=El correo ya esta registrado.");
+        exit;
     }
-    exit;
-}
 
 //LOGIN
 if ($action == 'login' && $_POST) {

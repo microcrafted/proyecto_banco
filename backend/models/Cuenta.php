@@ -59,7 +59,7 @@ class Cuenta {
     try {
         // 1. Verificar que la cuenta pertenezca al usuario
         $query = "SELECT saldo, estado FROM CUENTAS_BANCARIAS 
-                  WHERE id_cuenta = :id_cuenta AND id_usuario = :id_usuario";
+                WHERE id_cuenta = :id_cuenta AND id_usuario = :id_usuario";
 
         $stmt = $this->conexion->prepare($query);
         $stmt->bindParam(':id_cuenta', $idCuenta, PDO::PARAM_INT);
@@ -84,8 +84,8 @@ class Cuenta {
 
         // 4. Borrado lógico
         $update = "UPDATE CUENTAS_BANCARIAS 
-                   SET estado = 'cerrada' 
-                   WHERE id_cuenta = :id_cuenta";
+                SET estado = 'cerrada' 
+                WHERE id_cuenta = :id_cuenta";
 
         $stmt = $this->conexion->prepare($update);
         $stmt->bindParam(':id_cuenta', $idCuenta, PDO::PARAM_INT);
