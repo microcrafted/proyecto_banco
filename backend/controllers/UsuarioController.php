@@ -91,4 +91,29 @@ if ($action == 'cerrarCuenta' && $_POST) {
     exit;
 }
 
+//HU13 Transferir
+    if ($action == 'transferir' && $_POST) {
+        $id_cuenta_origen = $_POST['id_cuenta_origen'];
+        $num_cuenta_destino = htmlspecialchars(trim($_POST['num_cuenta_destino']));
+        $monto = floatval($_POST['monto']);
+        
+        $respuesta = $cuenta->transferir($id_cuenta_origen, $num_cuenta_destino, $monto);
+        
+        if ($respuesta['status'] === 'success') {
+            header("Location: ../views/dashboard.php?msg=" . urlencode($respuesta['mensaje']));
+        } else {
+            header("Location: ../views/dashboard.php?error=" . urlencode($respuesta['mensaje']));
+        }
+        exit;
+    }
+
+
+
+
+
+
+
+
+
+
 ?>
