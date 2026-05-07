@@ -129,6 +129,7 @@ CREATE TABLE `RECUPERACION_CONTRASENA` (
     ON DELETE CASCADE
 ) COMMENT = 'Soporte para HU5 - Recuperación de contraseña';
 
+
 -- ============================================
 -- ÍNDICES ADICIONALES
 -- ============================================
@@ -140,3 +141,15 @@ CREATE INDEX `idx_sesiones_usuario`   ON `SESIONES` (`id_usuario`);
 CREATE INDEX `idx_log_admin`          ON `LOG_ADMIN` (`id_admin`);
 CREATE INDEX `idx_log_fecha`          ON `LOG_ADMIN` (`fecha`);
 CREATE INDEX `idx_recuperacion_user`  ON `RECUPERACION_CONTRASENA` (`id_usuario`);
+
+-- ============================================
+-- TABLA ADICIONALES HU13
+-- ============================================
+create table if not exists TRANSACCIONES (
+    id_transaccion int AUTO_INCREMENT primary key,
+    id_cuenta_origen int null, 
+    id_cuenta_destino int null,
+    tipo_operacion varchar(20) not null,
+    monto DECIMAL(10,2) not null,
+    fecha TIMESTAMP default CURRENT_TIMESTAMP
+);

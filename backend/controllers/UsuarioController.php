@@ -11,8 +11,7 @@ $cuenta = new Cuenta($db);
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
-//REGISTRO (Frontend con Fetch API)
-//leemos datos JSON que envía el javascript
+//REGISTRO Fetch API
 $data = json_decode(file_get_contents("php://input"), true);
 
 if ($action == 'registrar' && $data) {
@@ -28,7 +27,6 @@ if ($action == 'registrar' && $data) {
         
         if ($respuesta_cuenta['status'] === 'success') {
             $num_cta = $respuesta_cuenta['data']['numero_cuenta'];
-            //en lugar de redireccionar, respondemos con JSON
             echo json_encode(["ok" => true, "mensaje" => "Registro exitoso. Se generó tu cuenta: " . $num_cta]);
         } else {
             echo json_encode(["ok" => false, "mensaje" => "Registro exitoso, pero hubo un error al generar la cuenta bancaria."]);
@@ -49,9 +47,9 @@ if ($action == 'login' && $_POST) {
     if ($datos) {
         $_SESSION['id_usuario'] = $datos['id_usuario'];
         $_SESSION['nombre_completo'] = $datos['nombre'] . ' ' . $datos['apellido'];
-        header("Location: ../views/dashboard.php");
+        header("Location: ../../frontend/pages/dashboard.php");
     } else {
-        header("Location: ../views/login.php?error=Credenciales invalidas o usuario inactivo.");
+        header("Location: ../../frontend/pages/login.php?error=Credenciales invalidas o usuario inactivo.");
     }
     exit;
 }
@@ -59,7 +57,83 @@ if ($action == 'login' && $_POST) {
 //LOGOUT
 if ($action == 'logout') {
     session_destroy();
-    header("Location: ../views/login.php");
+    header("Location: ../../frontend/pages/login.php");
+    exit;
+}
+
+// CREAR CUENTA
+if ($action == 'crearCuenta' && $_POST) {
+    $tipo = $_POST['tipo']; 
+    $id_usuario = $_SESSION['id_usuario'];
+
+    $respuesta = $cuenta->crearNuevaCuenta($id_usuario, $tipo);
+
+    if ($respuesta['status'] === 'success') {
+        header("Location: ../../frontend/pages/dashboard.php?msg=Cuenta creada correctamente");
+    } else {
+        header("Location: ../../frontend/pages/dashboard.php?error=" . $respuesta['mensaje']);
+    }
+    exit;
+}
+
+// CERRAR CUENTA
+if ($action == 'cerrarCuenta' && $_POST) {
+    $id_cuenta = $_POST['id_cuenta'];
+    $id_usuario = $_SESSION['id_usuario'];
+
+    $respuesta = $cuenta->cerrarCuenta($id_cuenta, $id_usuario);
+
+    if ($respuesta['status'] === 'success') {
+        header("Location: ../../frontend/pages/dashboard.php?msg=Cuenta cerrada");
+    } else {
+        header("Location: ../../frontend/pages/dashboard.php?error=" . $respuesta['mensaje']);
+    }
+    exit;
+}
+
+//HU11 Depositar
+if ($action == 'depositar' && $_POST) {
+    $id_cuenta = $_POST['id_cuenta'];
+    $monto = floatval($_POST['monto']);
+    
+    $respuesta = $cuenta->depositar($id_cuenta, $monto);
+    
+    if ($respuesta['status'] === 'success') {
+        header("Location: ../../frontend/pages/dashboard.php?msg=" . urlencode($respuesta['mensaje']));
+    } else {
+        header("Location: ../../frontend/pages/dashboard.php?error=" . urlencode($respuesta['mensaje']));
+    }
+    exit;
+}
+
+//HU12 Retirar
+if ($action == 'retirar' && $_POST) {
+    $id_cuenta = $_POST['id_cuenta'];
+    $monto = floatval($_POST['monto']);
+    
+    $respuesta = $cuenta->retirar($id_cuenta, $monto);
+    
+    if ($respuesta['status'] === 'success') {
+        header("Location: ../../frontend/pages/dashboard.php?msg=" . urlencode($respuesta['mensaje']));
+    } else {
+        header("Location: ../../frontend/pages/dashboard.php?error=" . urlencode($respuesta['mensaje']));
+    }
+    exit;
+}
+
+//HU13 Transferir
+if ($action == 'transferir' && $_POST) {
+    $id_cuenta_origen = $_POST['id_cuenta_origen'];
+    $num_cuenta_destino = htmlspecialchars(trim($_POST['num_cuenta_destino']));
+    $monto = floatval($_POST['monto']);
+    
+    $respuesta = $cuenta->transferir($id_cuenta_origen, $num_cuenta_destino, $monto);
+    
+    if ($respuesta['status'] === 'success') {
+        header("Location: ../../frontend/pages/dashboard.php?msg=" . urlencode($respuesta['mensaje']));
+    } else {
+        header("Location: ../../frontend/pages/dashboard.php?error=" . urlencode($respuesta['mensaje']));
+    }
     exit;
 }
 ?>
