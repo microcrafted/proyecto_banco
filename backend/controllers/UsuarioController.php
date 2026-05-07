@@ -136,14 +136,4 @@ if ($action == 'cerrarCuenta' && $_POST) {
         }
         exit;
     }
-
-
-
-
-
-
-
-
-
-
 ?>

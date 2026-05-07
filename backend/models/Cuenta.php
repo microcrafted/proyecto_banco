@@ -275,9 +275,5 @@ class Cuenta {
             return ["status" => "error", "mensaje" => "Error al procesar transferencia: " . $e->getMessage()];
         }
     }
-
-
-
-
 }
 ?>
