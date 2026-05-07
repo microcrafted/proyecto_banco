@@ -152,6 +152,57 @@ class Cuenta {
         }
     }
 
+    //HU12 y HU22 Retiro de dinero con validación de fondos
+    public function retirar($id_cuenta, $monto) {
+        if ($monto <= 0) {
+            return ["status" => "error", "mensaje" => "El monto a retirar debe ser mayor a 0."];
+        }
+
+        try {
+            $this->conexion->beginTransaction();
+
+            $querySaldo = "SELECT saldo FROM CUENTAS_BANCARIAS WHERE id_cuenta = :id_cuenta AND estado = 'activa' FOR UPDATE";
+            $stmtSaldo = $this->conexion->prepare($querySaldo);
+            $stmtSaldo->bindParam(':id_cuenta', $id_cuenta, PDO::PARAM_INT);
+            $stmtSaldo->execute();
+            $cuenta = $stmtSaldo->fetch(PDO::FETCH_ASSOC);
+
+            if (!$cuenta) {
+                $this->conexion->rollBack();
+                return ["status" => "error", "mensaje" => "La cuenta no existe o está cerrada."];
+            }
+
+            //validación de fondos suficientes (HU22)
+            if ($cuenta['saldo'] < $monto) {
+                $this->conexion->rollBack();
+                return ["status" => "error", "mensaje" => "Fondos insuficientes para realizar el retiro."];
+            }
+
+            //restar el saldo (HU12)
+            $queryResta = "UPDATE CUENTAS_BANCARIAS SET saldo = saldo - :monto WHERE id_cuenta = :id_cuenta";
+            $stmtResta = $this->conexion->prepare($queryResta);
+            $stmtResta->bindParam(':monto', $monto);
+            $stmtResta->bindParam(':id_cuenta', $id_cuenta, PDO::PARAM_INT);
+            $stmtResta->execute();
+
+            //registrar el movimiento en los Logs
+            $tipo = 'retiro';
+            $queryLog = "INSERT INTO TRANSACCIONES (id_cuenta_origen, tipo_operacion, monto) VALUES (:id_cuenta, :tipo, :monto)";
+            $stmtLog = $this->conexion->prepare($queryLog);
+            $stmtLog->bindParam(':id_cuenta', $id_cuenta, PDO::PARAM_INT);
+            $stmtLog->bindParam(':tipo', $tipo);
+            $stmtLog->bindParam(':monto', $monto);
+            $stmtLog->execute();
+
+            $this->conexion->commit();
+            return ["status" => "success", "mensaje" => "Retiro realizado con éxito."];
+
+        } catch (PDOException $e) {
+            $this->conexion->rollBack();
+            return ["status" => "error", "mensaje" => "Error al procesar el retiro: " . $e->getMessage()];
+        }
+    }
+    
     //HU13 Transferencia entre cuentas (Corregido para evitar colisiones PDO)
     public function transferir($id_cuenta_origen, $num_cuenta_destino, $monto){
         if ($monto <= 0) {
