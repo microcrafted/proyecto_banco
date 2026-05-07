@@ -101,4 +101,83 @@ class Cuenta {
     }
     }
 }
+
+//HU13 Transferencia entre cuentas (Corregido para evitar colisiones PDO)
+    public function transferir($id_cuenta_origen, $num_cuenta_destino, $monto) {
+        if ($monto <= 0) {
+            return ["status" => "error", "mensaje" => "El monto a transferir debe ser mayor a 0."];
+        }
+
+        try {
+            $this->conexion->beginTransaction();
+
+            //validar que la cuenta destino exista y esté activa
+            $queryDestino = "SELECT id_cuenta FROM CUENTAS_BANCARIAS WHERE num_cuenta = :num_cuenta AND estado = 'activa'";
+            $stmtDestino = $this->conexion->prepare($queryDestino);
+            $stmtDestino->bindParam(':num_cuenta', $num_cuenta_destino, PDO::PARAM_STR);
+            $stmtDestino->execute();
+            $cuentaDestino = $stmtDestino->fetch(PDO::FETCH_ASSOC);
+
+            if (!$cuentaDestino) {
+                $this->conexion->rollBack();
+                return ["status" => "error", "mensaje" => "La cuenta destino no existe o no está activa."];
+            }
+
+            $id_cuenta_destino_real = $cuentaDestino['id_cuenta'];
+
+            if ($id_cuenta_origen == $id_cuenta_destino_real) {
+                $this->conexion->rollBack();
+                return ["status" => "error", "mensaje" => "No puedes transferir a tu misma cuenta de origen."];
+            }
+
+            //validar fondos de la cuenta origen bloqueando la fila (HU22)
+            $querySaldo = "SELECT saldo FROM CUENTAS_BANCARIAS WHERE id_cuenta = :id_cuenta AND estado = 'activa' FOR UPDATE";
+            $stmtSaldo = $this->conexion->prepare($querySaldo);
+            $stmtSaldo->bindParam(':id_cuenta', $id_cuenta_origen, PDO::PARAM_INT);
+            $stmtSaldo->execute();
+            $cuentaOrigen = $stmtSaldo->fetch(PDO::FETCH_ASSOC);
+
+            if (!$cuentaOrigen || $cuentaOrigen['saldo'] < $monto) {
+                $this->conexion->rollBack();
+                return ["status" => "error", "mensaje" => "Fondos insuficientes para realizar la transferencia."];
+            }
+
+            //restar el dinero a la cuenta origen
+            $queryResta = "UPDATE CUENTAS_BANCARIAS SET saldo = saldo - :monto WHERE id_cuenta = :id_cuenta";
+            $stmtResta = $this->conexion->prepare($queryResta);
+            $stmtResta->bindParam(':monto', $monto);
+            $stmtResta->bindParam(':id_cuenta', $id_cuenta_origen, PDO::PARAM_INT);
+            $stmtResta->execute();
+
+            //sumar el dinero a la cuenta destino
+            $querySuma = "UPDATE CUENTAS_BANCARIAS SET saldo = saldo + :monto WHERE id_cuenta = :id_cuenta";
+            $stmtSuma = $this->conexion->prepare($querySuma);
+            $stmtSuma->bindParam(':monto', $monto);
+            $stmtSuma->bindParam(':id_cuenta', $id_cuenta_destino_real, PDO::PARAM_INT);
+            $stmtSuma->execute();
+
+            //registrar la transferencia en Logs (HU23)
+            $tipo = 'transferencia';
+            $queryLogTrans = "INSERT INTO TRANSACCIONES (id_cuenta_origen, id_cuenta_destino, tipo_operacion, monto) VALUES (:origen, :destino, :tipo, :monto)";
+            $stmtLogTrans = $this->conexion->prepare($queryLogTrans);
+            $stmtLogTrans->bindParam(':origen', $id_cuenta_origen, PDO::PARAM_INT);
+            $stmtLogTrans->bindParam(':destino', $id_cuenta_destino_real, PDO::PARAM_INT);
+            $stmtLogTrans->bindParam(':tipo', $tipo);
+            $stmtLogTrans->bindParam(':monto', $monto);
+            $stmtLogTrans->execute();
+
+            $this->conexion->commit();
+            return ["status" => "success", "mensaje" => "Transferencia realizada exitosamente."];
+
+        } catch (PDOException $e) {
+            $this->conexion->rollBack();
+            return ["status" => "error", "mensaje" => "Error al procesar transferencia: " . $e->getMessage()];
+        }
+    }
+
+
+
+
+
+
 ?>
