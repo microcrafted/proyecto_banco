@@ -9,7 +9,7 @@
     <?php if(isset($_GET['msg'])) echo "<p style='color:green;'>".$_GET['msg']."</p>"; ?>
     <?php if(isset($_GET['error'])) echo "<p style='color:red;'>".$_GET['error']."</p>"; ?>
 
-    <form action="../controllers/UsuarioController.php?action=login" method="POST">
+    <form action="../../backend/controllers/UsuarioController.php?action=login" method="POST">
         <label>Correo Electrónico:</label><br>
         <input type="email" name="email" required><br><br>
 
@@ -18,6 +18,6 @@
 
         <button type="submit">Entrar</button>
     </form>
-    <br><a href="../../frontend/pages/index.html">No tengo cuenta (Registrarme)</a>
+    <br><a href="./index.html">No tengo cuenta (Registrarme)</a>
 </body>
 </html>

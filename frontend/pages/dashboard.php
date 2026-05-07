@@ -1,12 +1,12 @@
 <?php
 session_start();
 if(!isset($_SESSION['id_usuario'])) {
-    header("Location: login.php");
+    header("Location: ./login.php");
     exit;
 }
 
-require_once '../config/database.php';
-require_once '../models/Cuenta.php';
+require_once '../../backend/config/database.php';
+require_once '../../backend/models/Cuenta.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -23,7 +23,7 @@ $mis_cuentas = $cuentaObj->obtenerCuentas($_SESSION['id_usuario']);
 <body>
 
 <h1>Bienvenido, <?php echo htmlspecialchars($_SESSION['nombre_completo']); ?></h1>
-<a href="../controllers/UsuarioController.php?action=logout">Cerrar Sesión</a>
+<a href="../../backend/controllers/UsuarioController.php?action=logout">Cerrar Sesión</a>
 
 <hr>
 
@@ -36,7 +36,7 @@ $mis_cuentas = $cuentaObj->obtenerCuentas($_SESSION['id_usuario']);
 <?php endif; ?>
 
 <h3>Crear nueva cuenta</h3>
-<form method="POST" action="../controllers/UsuarioController.php?action=crearCuenta">
+<form method="POST" action="../../backend/controllers/UsuarioController.php?action=crearCuenta">
     <label>Tipo de cuenta:</label>
     <select name="tipo" required>
         <option value="ahorro">Ahorro</option>
@@ -66,21 +66,21 @@ $mis_cuentas = $cuentaObj->obtenerCuentas($_SESSION['id_usuario']);
 
             <td>
                 <!-- Formulario de Depósito (HU11) -->
-                <form method="POST" action="../controllers/UsuarioController.php?action=depositar" style="display:block; margin-bottom: 5px;" onsubmit="return confirm('HU15: ¿Confirmas el depósito en esta cuenta?');">
+                <form method="POST" action="../../backend/controllers/UsuarioController.php?action=depositar" style="display:block; margin-bottom: 5px;" onsubmit="return confirm('HU15: ¿Confirmas el depósito en esta cuenta?');">
                     <input type="hidden" name="id_cuenta" value="<?php echo $cta['id_cuenta']; ?>">
                     <input type="number" name="monto" placeholder="Monto a depositar" step="0.01" min="0.01" required style="width: 140px;">
                     <button type="submit">Depositar</button>
                 </form>
 
                 <!-- Formulario de Retiro (HU12) -->
-                <form method="POST" action="../controllers/UsuarioController.php?action=retirar" style="display:block; margin-bottom: 5px;" onsubmit="return confirm('HU15: ¿Confirmas el retiro de esta cuenta?');">
+                <form method="POST" action="../../backend/controllers/UsuarioController.php?action=retirar" style="display:block; margin-bottom: 5px;" onsubmit="return confirm('HU15: ¿Confirmas el retiro de esta cuenta?');">
                     <input type="hidden" name="id_cuenta" value="<?php echo $cta['id_cuenta']; ?>">
                     <input type="number" name="monto" placeholder="Monto a retirar" step="0.01" min="0.01" required style="width: 140px;">
                     <button type="submit">Retirar</button>
                 </form>
 
                 <!-- Formulario de Transferencia (HU13) -->
-                <form method="POST" action="../controllers/UsuarioController.php?action=transferir" style="display:block; margin-bottom: 5px;" onsubmit="return confirm('HU15: ¿Confirmas la transferencia a la cuenta destino?');">
+                <form method="POST" action="../../backend/controllers/UsuarioController.php?action=transferir" style="display:block; margin-bottom: 5px;" onsubmit="return confirm('HU15: ¿Confirmas la transferencia a la cuenta destino?');">
                     <input type="hidden" name="id_cuenta_origen" value="<?php echo $cta['id_cuenta']; ?>">
                     <input type="text" name="num_cuenta_destino" placeholder="N° Cuenta Destino" required style="width: 140px;">
                     <input type="number" name="monto" placeholder="Monto" step="0.01" min="0.01" required style="width: 90px;">
@@ -88,7 +88,7 @@ $mis_cuentas = $cuentaObj->obtenerCuentas($_SESSION['id_usuario']);
                 </form>
 
                 <!-- Botón Cerrar Cuenta (HU10) -->
-                <form method="POST" action="../controllers/UsuarioController.php?action=cerrarCuenta" style="display:block; margin-top: 15px;" onsubmit="return confirm('HU10/HU15: ¿Estás seguro de que deseas CERRAR esta cuenta definitivamente?');">
+                <form method="POST" action="../../backend/controllers/UsuarioController.php?action=cerrarCuenta" style="display:block; margin-top: 15px;" onsubmit="return confirm('HU10/HU15: ¿Estás seguro de que deseas CERRAR esta cuenta definitivamente?');">
                     <input type="hidden" name="id_cuenta" value="<?php echo $cta['id_cuenta']; ?>">
                     <button type="submit" style="color: red;">Cerrar Cuenta</button>
                 </form>
