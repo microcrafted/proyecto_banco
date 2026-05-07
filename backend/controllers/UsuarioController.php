@@ -91,6 +91,21 @@ if ($action == 'cerrarCuenta' && $_POST) {
     exit;
 }
 
+//HU11 Depositar
+    if ($action == 'depositar' && $_POST) {
+        $id_cuenta = $_POST['id_cuenta'];
+        $monto = floatval($_POST['monto']);
+        
+        $respuesta = $cuenta->depositar($id_cuenta, $monto);
+        
+        if ($respuesta['status'] === 'success') {
+            header("Location: ../views/dashboard.php?msg=" . urlencode($respuesta['mensaje']));
+        } else {
+            header("Location: ../views/dashboard.php?error=" . urlencode($respuesta['mensaje']));
+        }
+        exit;
+    }
+
 //HU13 Transferir
     if ($action == 'transferir' && $_POST) {
         $id_cuenta_origen = $_POST['id_cuenta_origen'];

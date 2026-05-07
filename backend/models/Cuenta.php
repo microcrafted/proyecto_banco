@@ -100,10 +100,60 @@ class Cuenta {
         return ["status" => "error", "mensaje" => "Error BD: " . $e->getMessage()];
     }
     }
-}
 
-//HU13 Transferencia entre cuentas (Corregido para evitar colisiones PDO)
-    public function transferir($id_cuenta_origen, $num_cuenta_destino, $monto) {
+    //HU8 y HU16 Consultar detalle y saldo
+    public function obtenerDetalleCuenta($id_cuenta, $id_usuario) {
+        $query = "SELECT num_cuenta, tipo, saldo, estado FROM CUENTAS_BANCARIAS WHERE id_cuenta = :id_cuenta AND id_usuario = :id_usuario";
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':id_cuenta', $id_cuenta, PDO::PARAM_INT);
+        $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    //HU11 y HU23 Realizar Depósito con Registro de Log
+    public function depositar($id_cuenta, $monto) {
+        if ($monto <= 0) {
+            return ["status" => "error", "mensaje" => "El monto a depositar debe ser mayor a 0."];
+        }
+
+        try {
+            $this->conexion->beginTransaction();
+
+            //actualizamos el saldo (HU11)
+            $querySuma = "UPDATE CUENTAS_BANCARIAS SET saldo = saldo + :monto WHERE id_cuenta = :id_cuenta AND estado = 'activa'";
+            $stmtSuma = $this->conexion->prepare($querySuma);
+            $stmtSuma->bindParam(':monto', $monto);
+            $stmtSuma->bindParam(':id_cuenta', $id_cuenta, PDO::PARAM_INT);
+            $stmtSuma->execute();
+
+            if ($stmtSuma->rowCount() == 0) {
+                $this->conexion->rollBack();
+                return ["status" => "error", "mensaje" => "La cuenta no existe o está cerrada."];
+            }
+
+            //registramos el movimiento en los Logs (HU23)
+            $tipo = 'deposito';
+            $queryLog = "INSERT INTO TRANSACCIONES (id_cuenta_destino, tipo_operacion, monto) VALUES (:id_cuenta, :tipo, :monto)";
+            $stmtLog = $this->conexion->prepare($queryLog);
+            $stmtLog->bindParam(':id_cuenta', $id_cuenta, PDO::PARAM_INT);
+            $stmtLog->bindParam(':tipo', $tipo);
+            $stmtLog->bindParam(':monto', $monto);
+            $stmtLog->execute();
+
+            $this->conexion->commit();
+            
+            return ["status" => "success", "mensaje" => "Depósito realizado con éxito."];
+
+        } catch (PDOException $e) {
+            $this->conexion->rollBack();
+            return ["status" => "error", "mensaje" => "Error al procesar el depósito: " . $e->getMessage()];
+        }
+    }
+
+    //HU13 Transferencia entre cuentas (Corregido para evitar colisiones PDO)
+    public function transferir($id_cuenta_origen, $num_cuenta_destino, $monto){
         if ($monto <= 0) {
             return ["status" => "error", "mensaje" => "El monto a transferir debe ser mayor a 0."];
         }
@@ -178,6 +228,5 @@ class Cuenta {
 
 
 
-
-
+}
 ?>
