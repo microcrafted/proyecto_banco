@@ -1,31 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="./../css/estilos.css">
+    <title>Registro - Búho Bank</title>
+    <link rel="stylesheet" href="../css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f8; display: flex; min-height: 100vh; flex-direction: column; justify-content: center; margin: 0;}
+        .register-card { padding: 20px 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-top: 4px solid #1565c0; }
+        .brand-logo-custom { color: #1565c0; font-weight: bold; text-align: center; margin-bottom: 15px; }
+    </style>
 </head>
 <body>
-    <h2>Abrir Cuenta Bancaria</h2>
-    <form id="formRegistro">
-        <label>Nombre:</label><br>
-        <input type="text" id="nombre" name="nombre" required><br><br>
+    <div class="container">
+        <div class="row" style="margin-bottom: 0;">
+            <div class="col s12 m8 offset-m2 l6 offset-l3">
+                <div class="card white register-card">
+                    <div class="card-content">
+                        <h4 class="brand-logo-custom"><i class="material-icons prefix">account_balance</i> Búho Bank</h4>
+                        <p class="center-align grey-text" style="margin-bottom: 25px;">Abre tu cuenta bancaria en minutos</p>
 
-        <label>Apellido:</label><br>
-        <input type="text" id="apellido" name="apellido" required><br><br>
+                        <form id="formRegistro">
+                            <div class="row" style="margin-bottom: 0;">
+                                <div class="input-field col s6">
+                                    <i class="material-icons prefix">person</i>
+                                    <input id="nombre" type="text" name="nombre" required>
+                                    <label for="nombre">Nombre(s)</label>
+                                </div>
+                                <div class="input-field col s6">
+                                    <input id="apellido" type="text" name="apellido" required>
+                                    <label for="apellido">Apellido(s)</label>
+                                </div>
+                            </div>
 
-        <label>Correo Electrónico:</label><br>
-        <input type="email" id="email" name="email" required><br><br>
+                            <div class="input-field">
+                                <i class="material-icons prefix">email</i>
+                                <input id="email" type="email" name="email" required>
+                                <label for="email">Correo Electrónico</label>
+                            </div>
 
-        <label>Contraseña:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
+                            <div class="input-field">
+                                <i class="material-icons prefix">lock</i>
+                                <input id="password" type="password" name="password" required>
+                                <label for="password">Contraseña</label>
+                            </div>
 
-        <button type="submit">Registrarme</button>
-    </form>
-    <br><a href="./login.php">Ya tengo cuenta (Iniciar sesión)</a>
-    
-    <p id="mensaje"></p>
-<script src="../js/app.js"></script>
+                            <button class="btn waves-effect waves-light blue darken-3 col s12" type="submit" style="margin-top: 15px; border-radius: 4px; height: 45px; font-weight: bold;">
+                                Registrarme <i class="material-icons right">person_add</i>
+                            </button>
+                        </form>
+                        
+                        <p id="mensaje" class="center-align" style="margin-top: 15px; font-weight: bold;"></p>
+                    </div>
+                    
+                    <div class="card-action center-align" style="border-top: none; padding-top: 0;">
+                        <a href="login.php" class="blue-text text-darken-3">Ya tengo cuenta (Iniciar sesión)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/materialize.min.js"></script>
+    <script src="../js/app.js"></script>
 </body>
 </html>
