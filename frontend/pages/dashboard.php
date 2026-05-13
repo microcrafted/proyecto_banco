@@ -169,10 +169,14 @@ $datos_usuario = $usuarioObj->obtenerDatosPerfil($_SESSION['id_usuario']); // <-
                                         <td><strong><?php echo htmlspecialchars($cta['num_cuenta']); ?></strong></td>
                                         <td><span class="new badge blue darken-1" data-badge-caption=""><?php echo ucfirst(htmlspecialchars($cta['tipo'])); ?></span></td>
                                         <td class="green-text text-darken-2" style="font-size: 1.2rem; font-weight: bold;">$<?php echo number_format($cta['saldo'], 2); ?> MXN</td>
-                                        <td>
+                                        <td style="display: flex; gap: 10px;">
+                                            <a href="historial.php?id_cuenta=<?php echo $cta['id_cuenta']; ?>" class="btn-small blue darken-2 waves-effect waves-light" title="Ver Historial">
+                                                <i class="material-icons">history</i>
+                                            </a>
+
                                             <form method="POST" action="../../backend/controllers/UsuarioController.php?action=cerrarCuenta" onsubmit="return confirm('HU10/HU15: ¿Estás seguro de que deseas CERRAR esta cuenta definitivamente?');">
                                                 <input type="hidden" name="id_cuenta" value="<?php echo $cta['id_cuenta']; ?>">
-                                                <button class="btn-small red darken-2 waves-effect waves-light" type="submit"><i class="material-icons">cancel</i></button>
+                                                <button class="btn-small red darken-2 waves-effect waves-light" type="submit" title="Cerrar Cuenta"><i class="material-icons">cancel</i></button>
                                             </form>
                                         </td>
                                     </tr>
@@ -209,7 +213,14 @@ $datos_usuario = $usuarioObj->obtenerDatosPerfil($_SESSION['id_usuario']); // <-
                                 <input type="number" name="monto" id="monto_dep" step="0.01" min="0.01" required>
                                 <label for="monto_dep">Monto a depositar</label>
                             </div>
-                            <button class="btn green darken-1 waves-effect waves-light col s12" type="submit">Realizar Depósito</button>
+                            <div class="row" style="margin-bottom: 0;">
+                                <div class="col s6">
+                                    <button class="btn-flat red-text waves-effect waves-red col s12" type="reset" onclick="M.toast({html: 'Depósito cancelado', classes: 'red rounded'})">Cancelar</button>
+                                </div>
+                                <div class="col s6">
+                                    <button class="btn green darken-1 waves-effect waves-light col s12" type="submit" style="padding: 0;">Depositar</button>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -233,7 +244,14 @@ $datos_usuario = $usuarioObj->obtenerDatosPerfil($_SESSION['id_usuario']); // <-
                                 <input type="number" name="monto" id="monto_ret" step="0.01" min="0.01" required>
                                 <label for="monto_ret">Monto a retirar</label>
                             </div>
-                            <button class="btn orange darken-1 waves-effect waves-light col s12" type="submit">Realizar Retiro</button>
+                            <div class="row" style="margin-bottom: 0;">
+                                <div class="col s6">
+                                    <button class="btn-flat red-text waves-effect waves-red col s12" type="reset" onclick="M.toast({html: 'Retiro cancelado', classes: 'red rounded'})">Cancelar</button>
+                                </div>
+                                <div class="col s6">
+                                    <button class="btn orange darken-1 waves-effect waves-light col s12" type="submit" style="padding: 0;">Retirar</button>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -261,7 +279,14 @@ $datos_usuario = $usuarioObj->obtenerDatosPerfil($_SESSION['id_usuario']); // <-
                                 <input type="number" name="monto" id="monto_transf" step="0.01" min="0.01" required>
                                 <label for="monto_transf">Monto a transferir</label>
                             </div>
-                            <button class="btn blue darken-1 waves-effect waves-light col s12" type="submit">Transferir</button>
+                            <div class="row" style="margin-bottom: 0;">
+                                <div class="col s6">
+                                    <button class="btn-flat red-text waves-effect waves-red col s12" type="reset" onclick="M.toast({html: 'Transferencia cancelada', classes: 'red rounded'})">Cancelar</button>
+                                </div>
+                                <div class="col s6">
+                                    <button class="btn blue darken-1 waves-effect waves-light col s12" type="submit" style="padding: 0;">Transferir</button>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
