@@ -117,5 +117,15 @@ class Usuario {
             "mensaje" => "No se pudieron actualizar los datos."
         ];
     }
+
+    // HU4: Obtener datos actuales para el formulario de edición
+    public function obtenerDatosPerfil($id_usuario) {
+        $query = "SELECT nombre, apellido, email FROM USUARIOS WHERE id_usuario = :id_usuario";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>
