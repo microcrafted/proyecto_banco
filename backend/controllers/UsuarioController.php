@@ -163,7 +163,7 @@ if ($action == 'editarPerfil' && $_POST) {
     $respuesta = $usuario->actualizarPerfil(
         $id_usuario,
         $nombre,
-        $apellido,
+        $apellido,  
         $email
     );
 
@@ -178,6 +178,52 @@ if ($action == 'editarPerfil' && $_POST) {
         header("Location: ../../frontend/pages/dashboard.php?error=" . urlencode($respuesta['mensaje']));
     }
 
+    exit;
+}
+
+// HU11 Depositar
+if ($action == 'depositar' && $_POST) {
+    $id_cuenta = $_POST['id_cuenta'];
+    $monto = floatval($_POST['monto']);
+    
+    $respuesta = $cuenta->depositar($id_cuenta, $monto);
+    
+    if ($respuesta['status'] === 'success') {
+        header("Location: ../../frontend/pages/dashboard.php?msg=" . urlencode($respuesta['mensaje']));
+    } else {
+        header("Location: ../../frontend/pages/dashboard.php?error=" . urlencode($respuesta['mensaje']));
+    }
+    exit;
+}
+
+// HU12 Retirar
+if ($action == 'retirar' && $_POST) {
+    $id_cuenta = $_POST['id_cuenta'];
+    $monto = floatval($_POST['monto']);
+    
+    $respuesta = $cuenta->retirar($id_cuenta, $monto);
+    
+    if ($respuesta['status'] === 'success') {
+        header("Location: ../../frontend/pages/dashboard.php?msg=" . urlencode($respuesta['mensaje']));
+    } else {
+        header("Location: ../../frontend/pages/dashboard.php?error=" . urlencode($respuesta['mensaje']));
+    }
+    exit;
+}
+
+// HU13 Transferir
+if ($action == 'transferir' && $_POST) {
+    $id_cuenta_origen = $_POST['id_cuenta_origen'];
+    $num_cuenta_destino = htmlspecialchars(trim($_POST['num_cuenta_destino']));
+    $monto = floatval($_POST['monto']);
+    
+    $respuesta = $cuenta->transferir($id_cuenta_origen, $num_cuenta_destino, $monto);
+    
+    if ($respuesta['status'] === 'success') {
+        header("Location: ../../frontend/pages/dashboard.php?msg=" . urlencode($respuesta['mensaje']));
+    } else {
+        header("Location: ../../frontend/pages/dashboard.php?error=" . urlencode($respuesta['mensaje']));
+    }
     exit;
 }
 ?>
