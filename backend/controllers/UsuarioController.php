@@ -226,4 +226,39 @@ if ($action == 'transferir' && $_POST) {
     }
     exit;
 }
+
+// HU20 Exportar Historial a CSV (Excel)
+if ($action == 'exportarHistorial' && isset($_GET['id_cuenta'])) {
+    
+    $id_cuenta = $_GET['id_cuenta'];
+    $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : 'todos';
+    $fecha_inicio = isset($_GET['fecha_inicio']) ? $_GET['fecha_inicio'] : '';
+    $fecha_fin = isset($_GET['fecha_fin']) ? $_GET['fecha_fin'] : '';
+
+    $historial = $cuenta->obtenerHistorialFiltrado($id_cuenta, $tipo, $fecha_inicio, $fecha_fin);
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename=Buhobank_Historial_Cuenta_' . $id_cuenta . '.csv');
+    $output = fopen('php://output', 'w');
+    
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+    fputcsv($output, array('Fecha y Hora', 'Operación', 'Detalle', 'Monto'));
+
+    if(count($historial) > 0) {
+        foreach ($historial as $mov) {
+            $es_ingreso = ($mov['id_cuenta_destino'] == $id_cuenta || $mov['tipo_operacion'] == 'deposito');
+            $signo = $es_ingreso ? '+' : '-';
+            
+            fputcsv($output, array(
+                date('d/m/Y H:i', strtotime($mov['fecha'])),
+                ucfirst($mov['tipo_operacion']),
+                'Transacción #' . $mov['id_transaccion'],
+                $signo . '$' . number_format($mov['monto'], 2)
+            ));
+        }
+    } else {
+        fputcsv($output, array('No hay movimientos en este periodo.'));
+    }
+    fclose($output);
+    exit;
+}
 ?>
