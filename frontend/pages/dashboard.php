@@ -7,37 +7,79 @@ if(!isset($_SESSION['id_usuario'])) {
 
 require_once '../../backend/config/database.php';
 require_once '../../backend/models/Cuenta.php';
+require_once '../../backend/models/Usuario.php'; // <-- 1. Agregamos el modelo Usuario
 
 $database = new Database();
 $db = $database->getConnection();
+
 $cuentaObj = new Cuenta($db);
+$usuarioObj = new Usuario($db); // <-- 2. Instanciamos al usuario
+
 $mis_cuentas = $cuentaObj->obtenerCuentas($_SESSION['id_usuario']);
+$datos_usuario = $usuarioObj->obtenerDatosPerfil($_SESSION['id_usuario']); // <-- 3. Magia MVC
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Búho Bank</title>
+
     <link rel="stylesheet" href="../css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <style>
-        body { background-color: #f4f6f8; }
-        .brand-logo { padding-left: 20px !important; font-weight: bold; }
-        .account-card { border-top: 4px solid #1565c0; }
-        /* Flexbox para que los mini-formularios se vean ordenados */
-        .action-form { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .action-form input { margin-bottom: 0 !important; height: 2rem !important; }
+        body {
+            background-color: #f4f6f8;
+        }
+
+        .brand-logo {
+            padding-left: 20px !important;
+            font-weight: bold;
+        }
+
+        .account-card {
+            border-top: 4px solid #1565c0;
+        }
+
+        .perfil-card {
+            border-top: 4px solid #00897b;
+        }
+
+        .action-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .action-form input {
+            margin-bottom: 0 !important;
+            height: 2rem !important;
+        }
     </style>
 </head>
+
 <body>
 
     <nav class="blue darken-3">
         <div class="nav-wrapper">
-            <a href="#" class="brand-logo"><i class="material-icons">account_balance</i> Búho Bank</a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li><a href="../../backend/controllers/UsuarioController.php?action=logout" class="waves-effect waves-light btn red darken-1"><i class="material-icons left">exit_to_app</i>Cerrar Sesión</a></li>
+            <a href="#" class="brand-logo">
+                <i class="material-icons">account_balance</i>
+                Búho Bank
+            </a>
+
+            <ul class="right hide-on-med-and-down">
+                <li>
+                    <a href="../../backend/controllers/UsuarioController.php?action=logout"
+                        class="waves-effect waves-light btn red darken-1">
+
+                        <i class="material-icons left">exit_to_app</i>
+                        Cerrar Sesión
+                    </a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -57,6 +99,35 @@ $mis_cuentas = $cuentaObj->obtenerCuentas($_SESSION['id_usuario']);
                 <i class="material-icons left">error</i> <?php echo htmlspecialchars($_GET['error']); ?>
             </div>
         <?php endif; ?>
+
+        <div class="row">
+            <div class="col s12">
+                <div class="card white perfil-card" style="border-top: 4px solid #00897b;">
+                    <div class="card-content">
+                        <span class="card-title" style="font-weight: bold;"><i class="material-icons left">person</i> Mis Datos Personales</span>
+                        <form method="POST" action="../../backend/controllers/UsuarioController.php?action=editarPerfil">
+                            <div class="row" style="margin-bottom: 0;">
+                                <div class="input-field col s12 m4">
+                                    <input type="text" name="nombre" id="nombre" value="<?php echo htmlspecialchars($datos_usuario['nombre']); ?>" required>
+                                    <label for="nombre" class="active">Nombre</label>
+                                </div>
+                                <div class="input-field col s12 m4">
+                                    <input type="text" name="apellido" id="apellido" value="<?php echo htmlspecialchars($datos_usuario['apellido']); ?>" required>
+                                    <label for="apellido" class="active">Apellido</label>
+                                </div>
+                                <div class="input-field col s12 m4">
+                                    <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($datos_usuario['email']); ?>" required>
+                                    <label for="email" class="active">Correo Electrónico</label>
+                                </div>
+                            </div>
+                            <button class="btn teal darken-1 waves-effect waves-light" type="submit">
+                                <i class="material-icons left">save</i> Guardar Cambios
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col s12 m4">
@@ -79,7 +150,7 @@ $mis_cuentas = $cuentaObj->obtenerCuentas($_SESSION['id_usuario']);
             </div>
 
             <div class="col s12 m8">
-                <div class="card white account-card">
+                <div class="card white account-card" style="border-top: 4px solid #1565c0;">
                     <div class="card-content">
                         <span class="card-title" style="font-weight: bold;"><i class="material-icons left">account_balance_wallet</i> Mis Cuentas</span>
                         <table class="highlight responsive-table">
@@ -88,7 +159,7 @@ $mis_cuentas = $cuentaObj->obtenerCuentas($_SESSION['id_usuario']);
                                     <th>N° de Cuenta</th>
                                     <th>Tipo</th>
                                     <th>Saldo Disponible</th>
-                                    <th>Operaciones</th>
+                                    <th>Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -98,30 +169,14 @@ $mis_cuentas = $cuentaObj->obtenerCuentas($_SESSION['id_usuario']);
                                         <td><strong><?php echo htmlspecialchars($cta['num_cuenta']); ?></strong></td>
                                         <td><span class="new badge blue darken-1" data-badge-caption=""><?php echo ucfirst(htmlspecialchars($cta['tipo'])); ?></span></td>
                                         <td class="green-text text-darken-2" style="font-size: 1.2rem; font-weight: bold;">$<?php echo number_format($cta['saldo'], 2); ?> MXN</td>
-                                        
-                                        <td>
-                                            <form method="POST" action="../../backend/controllers/UsuarioController.php?action=depositar" class="action-form" onsubmit="return confirm('HU15: ¿Confirmas el depósito en esta cuenta?');">
-                                                <input type="hidden" name="id_cuenta" value="<?php echo $cta['id_cuenta']; ?>">
-                                                <input type="number" name="monto" placeholder="Monto" step="0.01" min="0.01" required style="width: 90px;">
-                                                <button class="btn-small green darken-1 waves-effect waves-light" type="submit" title="Depositar"><i class="material-icons">add</i></button>
-                                            </form>
+                                        <td style="display: flex; gap: 10px;">
+                                            <a href="historial.php?id_cuenta=<?php echo $cta['id_cuenta']; ?>" class="btn-small blue darken-2 waves-effect waves-light" title="Ver Historial">
+                                                <i class="material-icons">history</i>
+                                            </a>
 
-                                            <form method="POST" action="../../backend/controllers/UsuarioController.php?action=retirar" class="action-form" onsubmit="return confirm('HU15: ¿Confirmas el retiro de esta cuenta?');">
+                                            <form method="POST" action="../../backend/controllers/UsuarioController.php?action=cerrarCuenta" onsubmit="return confirm('HU10/HU15: ¿Estás seguro de que deseas CERRAR esta cuenta definitivamente?');">
                                                 <input type="hidden" name="id_cuenta" value="<?php echo $cta['id_cuenta']; ?>">
-                                                <input type="number" name="monto" placeholder="Monto" step="0.01" min="0.01" required style="width: 90px;">
-                                                <button class="btn-small orange darken-2 waves-effect waves-light" type="submit" title="Retirar"><i class="material-icons">remove</i></button>
-                                            </form>
-
-                                            <form method="POST" action="../../backend/controllers/UsuarioController.php?action=transferir" class="action-form" onsubmit="return confirm('HU15: ¿Confirmas la transferencia a la cuenta destino?');">
-                                                <input type="hidden" name="id_cuenta_origen" value="<?php echo $cta['id_cuenta']; ?>">
-                                                <input type="text" name="num_cuenta_destino" placeholder="N° Destino" required style="width: 110px;">
-                                                <input type="number" name="monto" placeholder="Monto" step="0.01" min="0.01" required style="width: 80px;">
-                                                <button class="btn-small blue waves-effect waves-light" type="submit" title="Transferir"><i class="material-icons">swap_horiz</i></button>
-                                            </form>
-
-                                            <form method="POST" action="../../backend/controllers/UsuarioController.php?action=cerrarCuenta" style="margin-top: 15px;" onsubmit="return confirm('HU10/HU15: ¿Estás seguro de que deseas CERRAR esta cuenta definitivamente?');">
-                                                <input type="hidden" name="id_cuenta" value="<?php echo $cta['id_cuenta']; ?>">
-                                                <button class="btn-small red darken-2 waves-effect waves-light" type="submit" style="width: 100%;"><i class="material-icons left">cancel</i>Cerrar Cuenta</button>
+                                                <button class="btn-small red darken-2 waves-effect waves-light" type="submit" title="Cerrar Cuenta"><i class="material-icons">cancel</i></button>
                                             </form>
                                         </td>
                                     </tr>
@@ -136,14 +191,114 @@ $mis_cuentas = $cuentaObj->obtenerCuentas($_SESSION['id_usuario']);
                     </div>
                 </div>
             </div>
+        </div> 
+        <h5 style="margin-top: 30px; font-weight: bold; color: #1565c0;">Operaciones Rápidas</h5>
+        <div class="row">
+            
+            <div class="col s12 m4">
+                <div class="card white" style="border-top: 4px solid #43a047;">
+                    <div class="card-content">
+                        <span class="card-title" style="font-size: 1.2rem; font-weight: bold;"><i class="material-icons left green-text">arrow_downward</i> Depositar</span>
+                        <form method="POST" action="../../backend/controllers/UsuarioController.php?action=depositar" onsubmit="return confirm('¿Confirmas el depósito?');">
+                            <div class="input-field">
+                                <select name="id_cuenta" required>
+                                    <option value="" disabled selected>Selecciona tu cuenta</option>
+                                    <?php foreach($mis_cuentas as $cta): ?>
+                                        <option value="<?php echo $cta['id_cuenta']; ?>"><?php echo $cta['num_cuenta'] . ' - $' . number_format($cta['saldo'], 2); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <label>Cuenta Destino</label>
+                            </div>
+                            <div class="input-field">
+                                <input type="number" name="monto" id="monto_dep" step="0.01" min="0.01" required>
+                                <label for="monto_dep">Monto a depositar</label>
+                            </div>
+                            <div class="row" style="margin-bottom: 0;">
+                                <div class="col s6">
+                                    <button class="btn-flat red-text waves-effect waves-red col s12" type="reset" onclick="M.toast({html: 'Depósito cancelado', classes: 'red rounded'})">Cancelar</button>
+                                </div>
+                                <div class="col s6">
+                                    <button class="btn green darken-1 waves-effect waves-light col s12" type="submit" style="padding: 0;">Depositar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col s12 m4">
+                <div class="card white" style="border-top: 4px solid #fb8c00;">
+                    <div class="card-content">
+                        <span class="card-title" style="font-size: 1.2rem; font-weight: bold;"><i class="material-icons left orange-text">arrow_upward</i> Retirar</span>
+                        <form method="POST" action="../../backend/controllers/UsuarioController.php?action=retirar" onsubmit="return confirm('¿Confirmas el retiro?');">
+                            <div class="input-field">
+                                <select name="id_cuenta" required>
+                                    <option value="" disabled selected>Selecciona tu cuenta</option>
+                                    <?php foreach($mis_cuentas as $cta): ?>
+                                        <option value="<?php echo $cta['id_cuenta']; ?>"><?php echo $cta['num_cuenta'] . ' - $' . number_format($cta['saldo'], 2); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <label>Cuenta Origen</label>
+                            </div>
+                            <div class="input-field">
+                                <input type="number" name="monto" id="monto_ret" step="0.01" min="0.01" required>
+                                <label for="monto_ret">Monto a retirar</label>
+                            </div>
+                            <div class="row" style="margin-bottom: 0;">
+                                <div class="col s6">
+                                    <button class="btn-flat red-text waves-effect waves-red col s12" type="reset" onclick="M.toast({html: 'Retiro cancelado', classes: 'red rounded'})">Cancelar</button>
+                                </div>
+                                <div class="col s6">
+                                    <button class="btn orange darken-1 waves-effect waves-light col s12" type="submit" style="padding: 0;">Retirar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col s12 m4">
+                <div class="card white" style="border-top: 4px solid #1e88e5;">
+                    <div class="card-content">
+                        <span class="card-title" style="font-size: 1.2rem; font-weight: bold;"><i class="material-icons left blue-text">swap_horiz</i> Transferir</span>
+                        <form method="POST" action="../../backend/controllers/UsuarioController.php?action=transferir" onsubmit="return confirm('¿Confirmas la transferencia?');">
+                            <div class="input-field">
+                                <select name="id_cuenta_origen" required>
+                                    <option value="" disabled selected>Cuenta a retirar</option>
+                                    <?php foreach($mis_cuentas as $cta): ?>
+                                        <option value="<?php echo $cta['id_cuenta']; ?>"><?php echo $cta['num_cuenta'] . ' - $' . number_format($cta['saldo'], 2); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <label>Cuenta Origen</label>
+                            </div>
+                            <div class="input-field">
+                                <input type="text" name="num_cuenta_destino" id="destino_transf" required>
+                                <label for="destino_transf">N° Cuenta Destino</label>
+                            </div>
+                            <div class="input-field">
+                                <input type="number" name="monto" id="monto_transf" step="0.01" min="0.01" required>
+                                <label for="monto_transf">Monto a transferir</label>
+                            </div>
+                            <div class="row" style="margin-bottom: 0;">
+                                <div class="col s6">
+                                    <button class="btn-flat red-text waves-effect waves-red col s12" type="reset" onclick="M.toast({html: 'Transferencia cancelada', classes: 'red rounded'})">Cancelar</button>
+                                </div>
+                                <div class="col s6">
+                                    <button class="btn blue darken-1 waves-effect waves-light col s12" type="submit" style="padding: 0;">Transferir</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="../js/materialize.min.js"></script>
+
     <script>
-        // Materialize requiere inicializar los elementos <select> con JS para que se vean bonitos
-        document.addEventListener('DOMContentLoaded', function() {
-            var elems = document.querySelectorAll('select');
+        document.addEventListener('DOMContentLoaded', function () {
+            const elems = document.querySelectorAll('select');
             M.FormSelect.init(elems);
         });
     </script>

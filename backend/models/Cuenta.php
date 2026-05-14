@@ -275,5 +275,46 @@ class Cuenta {
             return ["status" => "error", "mensaje" => "Error al procesar transferencia: " . $e->getMessage()];
         }
     }
+
+    // HU17 y HU19: Obtener historial con filtros dinámicos
+    public function obtenerHistorialFiltrado($id_cuenta, $tipo = 'todos', $fecha_inicio = '', $fecha_fin = '') {
+        $query = "SELECT id_transaccion, id_cuenta_origen, id_cuenta_destino, tipo_operacion, monto, fecha 
+                FROM TRANSACCIONES 
+                WHERE (id_cuenta_origen = :id_origen OR id_cuenta_destino = :id_destino)";
+        
+        // Agregar filtros si el usuario los seleccionó
+        if (!empty($tipo) && $tipo != 'todos') {
+            $query .= " AND tipo_operacion = :tipo";
+        }
+        if (!empty($fecha_inicio)) {
+            $query .= " AND fecha >= :fecha_inicio";
+        }
+        if (!empty($fecha_fin)) {
+            // Agregamos 23:59:59 para incluir todo ese día completo
+            $query .= " AND fecha <= :fecha_fin_full";
+        }
+        
+        $query .= " ORDER BY fecha DESC";
+        
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':id_origen', $id_cuenta, PDO::PARAM_INT);
+        $stmt->bindParam(':id_destino', $id_cuenta, PDO::PARAM_INT);
+        
+        // Bind de los filtros dinámicos
+        if (!empty($tipo) && $tipo != 'todos') {
+            $stmt->bindParam(':tipo', $tipo);
+        }
+        if (!empty($fecha_inicio)) {
+            $fecha_inicio_str = $fecha_inicio . " 00:00:00";
+            $stmt->bindParam(':fecha_inicio', $fecha_inicio_str);
+        }
+        if (!empty($fecha_fin)) {
+            $fecha_fin_str = $fecha_fin . " 23:59:59";
+            $stmt->bindParam(':fecha_fin_full', $fecha_fin_str);
+        }
+        
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>
