@@ -58,30 +58,40 @@ if ($action == 'registrar' && $data) {
     exit;
 }
 
-
-// LOGIN
+// LOGIN (Con HU24: Bloqueo de seguridad)
 if ($action == 'login' && $_POST) {
-
     $email = htmlspecialchars(trim($_POST['email']));
     $password = $_POST['password'];
 
-    $datos = $usuario->login($email, $password);
+    $respuesta = $usuario->login($email, $password);
 
-    if ($datos) {
-
+    if ($respuesta['status'] === 'success') {
+        $datos = $respuesta['data'];
+        
         $_SESSION['id_usuario'] = $datos['id_usuario'];
         $_SESSION['nombre_completo'] = $datos['nombre'] . ' ' . $datos['apellido'];
 
         header("Location: ../../frontend/pages/dashboard.php");
-
     } else {
-
-        header("Location: ../../frontend/pages/login.php?error=Credenciales inválidas.");
+        header("Location: ../../frontend/pages/login.php?error=" . urlencode($respuesta['mensaje']));
     }
-
     exit;
 }
 
+// HU5: Recuperar contraseña
+if ($action == 'recuperar' && $_POST) {
+    $email = htmlspecialchars(trim($_POST['email']));
+
+    $respuesta = $usuario->recuperarPassword($email);
+
+    if ($respuesta['status'] === 'success') {
+        $mensaje = "Éxito. Tu contraseña temporal es: " . $respuesta['temporal'];
+        header("Location: ../../frontend/pages/recuperar.php?msg=" . urlencode($mensaje));
+    } else {
+        header("Location: ../../frontend/pages/recuperar.php?error=" . urlencode($respuesta['mensaje']));
+    }
+    exit;
+}
 
 // LOGOUT
 if ($action == 'logout') {
@@ -92,7 +102,6 @@ if ($action == 'logout') {
 
     exit;
 }
-
 
 // CREAR CUENTA
 if ($action == 'crearCuenta' && $_POST) {
