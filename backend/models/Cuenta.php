@@ -41,11 +41,24 @@ class Cuenta {
 
     //HU7 - Dashboard
     public function obtenerCuentas($id_usuario) {
-        $query = "SELECT id_cuenta, num_cuenta, tipo, saldo FROM CUENTAS_BANCARIAS WHERE id_usuario = :id_usuario AND estado = 'activa'";
-        $stmt = $this->conexion->prepare($query); // Usamos $conexion para respetar el código de Mich
+
+        $query = "SELECT 
+                id_cuenta,
+                num_cuenta,
+                tipo,
+                saldo,
+                estado,
+                fecha_apertura
+            FROM CUENTAS_BANCARIAS
+            WHERE id_usuario = :id_usuario
+            AND estado = 'activa'";
+
+        $stmt = $this->conexion->prepare($query);
+
         $stmt->bindParam(":id_usuario", $id_usuario);
+
         $stmt->execute();
-        
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

@@ -156,9 +156,11 @@ $datos_usuario = $usuarioObj->obtenerDatosPerfil($_SESSION['id_usuario']); // <-
                         <table class="highlight responsive-table">
                             <thead>
                                 <tr>
-                                    <th>N° de Cuenta</th>
+                                    <th>N° Cuenta</th>
                                     <th>Tipo</th>
-                                    <th>Saldo Disponible</th>
+                                    <th>Saldo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Apertura</th>
                                     <th>Acción</th>
                                 </tr>
                             </thead>
@@ -166,14 +168,35 @@ $datos_usuario = $usuarioObj->obtenerDatosPerfil($_SESSION['id_usuario']); // <-
                                 <?php if(count($mis_cuentas) > 0): ?>
                                     <?php foreach($mis_cuentas as $cta): ?>
                                     <tr>
-                                        <td><strong><?php echo htmlspecialchars($cta['num_cuenta']); ?></strong></td>
-                                        <td><span class="new badge blue darken-1" data-badge-caption=""><?php echo ucfirst(htmlspecialchars($cta['tipo'])); ?></span></td>
-                                        <td class="green-text text-darken-2" style="font-size: 1.2rem; font-weight: bold;">$<?php echo number_format($cta['saldo'], 2); ?> MXN</td>
+                                        <td>
+                                            <strong>
+                                                <?php echo htmlspecialchars($cta['num_cuenta']); ?>
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <span class="new badge blue darken-1" data-badge-caption="">
+                                                <?php echo ucfirst(htmlspecialchars($cta['tipo'])); ?>
+                                            </span>
+                                        </td>
+                                        <td class="green-text text-darken-2"
+                                            style="font-size: 1.1rem; font-weight: bold;">
+
+                                            $<?php echo number_format($cta['saldo'], 2); ?> MXN
+                                        </td>
+                                        <td>
+                                            <span class="new badge green darken-1" data-badge-caption="">
+                                                <?php echo ucfirst(htmlspecialchars($cta['estado'])); ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <i class="material-icons tiny blue-text">event</i>
+
+                                            <?php echo date("d/m/Y", strtotime($cta['fecha_apertura'])); ?>
+                                        </td>
                                         <td style="display: flex; gap: 10px;">
                                             <a href="historial.php?id_cuenta=<?php echo $cta['id_cuenta']; ?>" class="btn-small blue darken-2 waves-effect waves-light" title="Ver Historial">
                                                 <i class="material-icons">history</i>
                                             </a>
-
                                             <form method="POST" action="../../backend/controllers/UsuarioController.php?action=cerrarCuenta" onsubmit="return confirm('HU10/HU15: ¿Estás seguro de que deseas CERRAR esta cuenta definitivamente?');">
                                                 <input type="hidden" name="id_cuenta" value="<?php echo $cta['id_cuenta']; ?>">
                                                 <button class="btn-small red darken-2 waves-effect waves-light" type="submit" title="Cerrar Cuenta"><i class="material-icons">cancel</i></button>
