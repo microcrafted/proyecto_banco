@@ -57,8 +57,14 @@
                     <div class="card-action center-align" style="border-top: none; padding-top: 0;">
                         <a href="index.html" class="blue-text text-darken-3">¿No tienes cuenta? Regístrate aquí</a>
                     </div>
+                    <div class="center-align" style="margin-top: 15px;">
+                        <a href="recuperar.php" class="blue-text text-darken-2">¿Olvidaste tu contraseña?</a>
+                    </div>
                 </div>
-
+                
+                <div class="center-align" style="margin-top: 20px;">
+                    <a href="admin_login.php" class="grey-text" style="font-size: 12px;"><i class="material-icons" style="font-size: 14px; vertical-align: middle;">vpn_key</i> Portal Administrativo</a>
+                </div>
             </div>
         </div>
     </div>
