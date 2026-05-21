@@ -146,4 +146,4 @@ $historial = $cuentaObj->obtenerHistorialFiltrado($id_cuenta, $tipo_filtro, $fec
         });
     </script>
 </body>
-</html>
+</html>u
